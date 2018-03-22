@@ -9,12 +9,12 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MainWindow(QWidget *parent = 0);
+	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 private:
 	Ui::MainWindowClass ui;
 	void initializeGui();
-
+	void closeEvent(QCloseEvent* event) override;
 };
 
 #endif // MAINWINDOW_H
