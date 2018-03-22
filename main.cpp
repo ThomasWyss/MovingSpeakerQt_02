@@ -1,10 +1,9 @@
 #include "mainwindow.h"
 #include <QtWidgets/QApplication>
+#include <MovingSpeakerBootstrapper.h>
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	MainWindow w;
-	w.show();
-	return a.exec();
+	MovingSpeakerBootstrapper movingSpeakerBootstrapper(argc, argv);
+	return movingSpeakerBootstrapper.run();
 }

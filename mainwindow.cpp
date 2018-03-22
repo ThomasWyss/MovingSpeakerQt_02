@@ -3,10 +3,18 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
-	ui.setupUi(this);
+	initializeGui();
 }
 
 MainWindow::~MainWindow()
 {
+
+}
+
+void MainWindow::initializeGui()
+{
+
+	this->setFixedHeight(600);
+	this->setFixedWidth(800);
 
 }
