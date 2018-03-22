@@ -15,6 +15,6 @@ void MainWindow::initializeGui()
 {
 
 	this->setFixedHeight(600);
-	this->setFixedWidth(800);
+	this->setFixedWidth(900);
 
 }
