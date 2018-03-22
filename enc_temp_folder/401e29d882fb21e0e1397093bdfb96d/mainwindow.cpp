@@ -15,5 +15,6 @@ void MainWindow::initializeGui()
 
 	this->setFixedHeight(600);
 	this->setFixedWidth(900);
+	auto ab = this->x();
 
 }
