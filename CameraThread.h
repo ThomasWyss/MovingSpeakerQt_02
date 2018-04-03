@@ -1,8 +1,14 @@
 #pragma once
 #include <QObject>
-#include <QMainWindow>
 #include <QThread>
 #include <QString>
+
+#include "opencv2/videoio/videoio.hpp"
+
+#include "aruco/dictionary.hpp"
+
+using namespace cv;
+using namespace aruco;
 
 
 class CameraThread : public QThread
@@ -12,14 +18,17 @@ class CameraThread : public QThread
 public: 
 	CameraThread(QObject *parent = nullptr);
 	~CameraThread();
-
+	void stop();
 	//void setMessage(const QString &message);
-	void stop(void);
 
 protected:
-	void run(void);
+	void run(void) override;
+	void exit(void);
+
 
 private:
 	QString messageStr;
 	volatile bool stopped;
+	VideoCapture vid;
+	Mat frame;
 };
