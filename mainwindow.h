@@ -17,7 +17,7 @@ private:
 	void initializeGui();
 	void startThreads();
 	void closeEvent(QCloseEvent* event) override;
-	CameraThread CamThread;
+	CameraThread CamThread_[2];
 };
 
 #endif // MAINWINDOW_H

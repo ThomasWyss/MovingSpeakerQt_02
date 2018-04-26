@@ -19,6 +19,7 @@ public:
 	CameraThread(QObject *parent = nullptr);
 	~CameraThread();
 	void stop();
+	int	iVid;
 	//void setMessage(const QString &message);
 
 protected:
@@ -28,7 +29,7 @@ protected:
 
 private:
 	QString messageStr;
-	volatile bool stopped;
-	VideoCapture vid;
-	Mat frame;
+	volatile bool Stopped_;
+	VideoCapture Vid_;
+	Mat Frame_;
 };

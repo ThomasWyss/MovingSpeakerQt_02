@@ -62,6 +62,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_CameraThread.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="FrameCapture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="mainwindow.h">
@@ -82,6 +85,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="MovingSpeakerBootstrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameCapture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
