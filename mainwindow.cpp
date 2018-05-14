@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QLabel>
+#include <QPushButton>
 #include <QVideoWidget>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/videoio/videoio.hpp"
@@ -29,8 +30,16 @@ void MainWindow::initializeGui()
 	
 	//VidWidget->show();
 
-	auto *label = new QLabel(this);
+	auto *label = new QLabel("so what?");
+	label->setParent(this);
 	label->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+	label->show();
+	auto FirstButton = new QPushButton("OK");
+	FirstButton->setParent(this);
+	FirstButton->setFixedHeight(20);
+	FirstButton->setFixedWidth(100);
+	FirstButton->show();
+
 	//cv::imshow("label", videoFrame);
 	//label->setPixmap(videoFrame);
 	this->setFixedHeight(600);

@@ -1,31 +1,33 @@
 #include <cstdio>
+#include "cstdarg"
+#
+#include <aruco.hpp>
+#include <cameraparameters.h>
+
 #include <CameraThread.h>
 
-#include <opencv2/aruco.hpp>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/videoio/videoio.hpp"
 
 #include "aruco/dictionary.hpp"
 #include <qcoreapplication.h>
 #include <chrono>
-
+#include <QFile>
+#include <QTextStream>
+#include <QMessageBox>
 
 
 
 #define M_PI  3.14159265358979323846
 #define FontSize 14
 #define Left 180
+#define iniFile "C:\\Users\\Thomas\\CloudStation\\ARTORG\\MovingSpeaker\\C++\\MovingSpeakerQt_02\\x64\\MovingSpeaker.ini"
+#define calFile0 "C:\Program Files\aruco_304_x64_vc14\bin\camera0.yml"
+#define calFile1 "C:\\Program Files\\aruco_304_x64_vc14\\bin\\camera1.yml"
 
 using namespace std;
-using namespace cv;
-using namespace aruco;
-
-
-cv::Mat InImage, OutImage, InDst;
-cv::Mat inputImage;
-vector< int > markerIds;
-vector< vector<Point2f>> markerCorners, rejectedCandidates;
-vector< vector<Point2f> >::iterator itMarker;
+//using namespace cv;
+//using namespace aruco;
 
 
 
@@ -49,12 +51,79 @@ void CameraThread::stop()
 
 void CameraThread::run(void)
 {
+	cv::Mat InImage, OutImage, InDst;
+	cv::Mat inputImage;
+	vector< int > markerIds;
+	vector< vector<Point2f>> markerCorners, rejectedCandidates;
+	vector< vector<Point2f> >::iterator itMarker;
+	//FileStorage fs(calFile1, CV_STORAGE_READ);
+	FileStorage fs;
+
 	Vid_.open(iVid);
-	Vid_.set(CAP_PROP_FRAME_WIDTH, 1280.0);
-	Vid_.set(CAP_PROP_FRAME_HEIGHT, 720.0);
+	Vid_.set(CAP_PROP_FRAME_WIDTH, 1920.0);
+	Vid_.set(CAP_PROP_FRAME_HEIGHT, 1080.0);
 
 	if (!Vid_.isOpened()) return;
 	Stopped_ = false;
+	
+	QFile file(iniFile);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	int flidx=0;
+	while (!file.atEnd()) {
+		string line = file.readLine();
+		line.resize(line.size() - 1);
+		if (flidx==iVid)fs.open(line, CV_STORAGE_READ);
+
+		flidx++;
+	}
+
+	auto fabcd=fs.isOpened();
+	
+	int imageWidth = (int)fs["image_width"];
+	int imageHeigth = (int)fs["image_height"];
+
+	Mat cameraMatrix, distCoeffs;
+	fs["camera_matrix"] >> cameraMatrix;
+	fs["distortion_coefficients"] >> distCoeffs;
+	auto iCamRows = cameraMatrix.rows;
+	auto iCamCols = cameraMatrix.cols;
+
+	const FileNode cameraMatrixFn = fs["camera_matrix"];
+	auto it = cameraMatrixFn["data"].begin(), it_end = cameraMatrixFn["data"].end();
+	auto idx = 0;
+	double dCamMatrixParam[9]={};
+	for (; it != it_end; ++it  )
+	{
+
+		dCamMatrixParam[idx] = (double)(*it);
+		if (idx<3)
+		{
+			camMatrix[0][idx] = dCamMatrixParam[idx];
+		}
+		if (idx>2 && idx<6)
+		{
+			camMatrix[1][idx-3] = dCamMatrixParam[idx];
+		}
+		if (idx>5)
+		{
+			camMatrix[2][idx-6] = dCamMatrixParam[idx];
+		}
+		idx++;
+	}
+
+	const FileNode cameraDistortionFn = fs["distortion_coefficients"];
+	FileNodeIterator itD = cameraDistortionFn["data"].begin(), it_endD = cameraDistortionFn["data"].end();
+	idx = 0;
+	double dCamDistCoef[5] = {};
+	for (; itD != it_endD; ++itD)
+	{
+		idx++;
+		dCamDistCoef[idx] = (double)(*itD);
+	}
+	fs.release();
+
 	Point pAb = Point(Left, 200);
 	Point pCenter = Point(640, 370);
 	char cpWindowName[50], cpPhyData[50], cpWinData[128], cpWinData_2[50];
@@ -62,9 +131,10 @@ void CameraThread::run(void)
 
 	const cv::Ptr<cv::aruco::Dictionary> dictionary = getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_ARUCO_ORIGINAL);
 	cv::aruco::drawMarker(dictionary, 25, 200, OutImage, 1);
-	auto& parameters = DetectorParameters::create();
+	auto& parameters = cv::aruco::DetectorParameters::create();
 	String cerr;
 	const cv::QtFont fontA = cv::fontQt("Times",FontSize);
+
 
 	const int iHeight= Vid_.get(CAP_PROP_FRAME_HEIGHT);
 	const int iWidth = Vid_.get(CAP_PROP_FRAME_WIDTH);
@@ -81,7 +151,7 @@ void CameraThread::run(void)
 	double dSumX = 0;
 	double dSumY = 0;	
 	Point pXy,  pPhy, pXySum;
-	double dPhy, dDiag, dFps, dTime;
+	double dPhy, dDiag, dFps=0, dTime;
 	int iCounter = 0;
 	std::chrono::duration<double, std::milli> fp_ms, fp_ms_1;
 
@@ -90,13 +160,11 @@ void CameraThread::run(void)
 		chronoNow = std::chrono::high_resolution_clock::now();
 		chronotimeDiff = chronoNow - chronoOld;
 		dFps = dFps + chronotimeDiff.count();
-		//double fp_ms10 = fp_ms10 + double(fp_ms);
-		if (iCounter == 10)
+
+		if (iCounter == 20)
 		{
-			dTime = dFps / 10;
+			dTime = dFps / 20;
 			dFps = 0;
-			
-			//fp_ms10 = 0;
 			iCounter = 0;
 		}
 		iCounter++;
@@ -134,9 +202,18 @@ void CameraThread::run(void)
 		chronoNowLoop = std::chrono::high_resolution_clock::now();
 		fp_ms = chronoNowLoop - chronoNow;
 		std::chrono::duration<double, std::milli> fp_ms_1 = chronoNow - chronoOld;
-		sprintf_s(cpWinData, "intern: %05.1f  full: %05.1f  diff: %05.1f  ISdiff: %05.1f", 
-						      fp_ms, fp_ms_1, fp_ms_1-fp_ms, 1000*chronoImviewDiff.count());
+		sprintf_s(cpWinData, "intern: %05.1f  full: %05.1f  diff: %05.1f  ISdiff: %05.1f",
+			fp_ms, fp_ms_1, fp_ms_1 - fp_ms, 1000 * chronoImviewDiff.count());
 		cv::addText(Frame_, cpWinData, Point(180, 240), fontA);
+		sprintf_s(cpWinData, "%06.1f %06.1f %06.1f",
+			camMatrix[0][0], camMatrix[0][1], camMatrix[0][2]);
+		cv::addText(Frame_, cpWinData, Point(1000, 200), fontA);
+		sprintf_s(cpWinData, "%06.1f %06.1f %06.1f",
+			camMatrix[1][0], camMatrix[1][1], camMatrix[1][2]);
+		cv::addText(Frame_, cpWinData, Point(1000, 220), fontA);
+		sprintf_s(cpWinData, "%06.1f %06.1f %06.1f",
+			camMatrix[2][0], camMatrix[2][1], camMatrix[2][2]);
+		cv::addText(Frame_, cpWinData, Point(1000, 240), fontA);
 
 		QCoreApplication::processEvents();
 		cv::imshow(cpWindowName, Frame_);
