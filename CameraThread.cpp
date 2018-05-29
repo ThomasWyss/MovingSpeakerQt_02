@@ -21,10 +21,10 @@
 #define M_PI  3.14159265358979323846
 #define FontSize 14
 #define Left 180
-#define iniFile "C:\\Users\\Thomas\\CloudStation\\ARTORG\\MovingSpeaker\\C++\\MovingSpeakerQt_02\\x64\\MovingSpeaker.ini"
-#define calFile0 "C:\Program Files\aruco_304_x64_vc14\bin\camera0.yml"
-#define calFile1 "C:\\Program Files\\aruco_304_x64_vc14\\bin\\camera1.yml"
-
+#define iniFile		"C:\\Users\\Thomas\\CloudStation\\ARTORG\\MovingSpeaker\\C++\\MovingSpeakerQt_02\\x64\\MovingSpeaker.ini"
+#define calFile0	"C:\Program Files\aruco_304_x64_vc14\bin\camera0.yml"
+#define calFile1	"C:\\Program Files\\aruco_304_x64_vc14\\bin\\camera1.yml"
+#define	CalFile		"C:\\Users\\Thomas\\CloudStation\\ARTORG\\MovingSpeaker\\C++\\MovingSpeakerQt_02\\Pictures\\WIN_20180529_13_32_31_Pro.jpg"
 using namespace std;
 //using namespace cv;
 //using namespace aruco;
@@ -155,7 +155,11 @@ void CameraThread::run(void)
 	int iCounter = 0;
 	std::chrono::duration<double, std::milli> fp_ms, fp_ms_1;
 
+
 	while (Vid_.read(Frame_)) {		
+		
+		Frame_= imread(CalFile, CV_LOAD_IMAGE_COLOR);
+		
 		chronoOld = chronoNow;
 		chronoNow = std::chrono::high_resolution_clock::now();
 		chronotimeDiff = chronoNow - chronoOld;
@@ -171,7 +175,7 @@ void CameraThread::run(void)
 		sprintf_s(cpWinData, "%d %d     fps: %05.1f", iHeight, iWidth, 1.0 / dTime);
 
 		detectMarkers(Frame_, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
-		//drawDetectedMarkers(Frame_, markerCorners, markerIds, Scalar(0, 255, 0));
+		cv::aruco::drawDetectedMarkers(Frame_, markerCorners, markerIds, Scalar(0, 255, 0));
 		
 		if (!markerCorners.empty())
 		{
