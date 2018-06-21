@@ -82,6 +82,9 @@
     <CustomBuild Include="CameraThread.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="QtMainBar.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_mainwindow.h">

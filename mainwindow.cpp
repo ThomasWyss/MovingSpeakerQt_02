@@ -1,9 +1,14 @@
 #include "mainwindow.h"
 #include <QLabel>
+#include <QWidget>
+#include <QStatusbar>
+
+#include <QVBoxLayout>
 #include <QPushButton>
 #include <QVideoWidget>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/videoio/videoio.hpp"
+#include <QTextStream>
 
 #define cam 0
 CameraThread CamThread_[2];
@@ -19,31 +24,60 @@ MainWindow::~MainWindow()
 
 void MainWindow::initializeGui()
 {
-	//VideoCapture Vid_;
-	//Vid_.open(0);
-	//cv::Mat videoFrame;
-	//Vid_.read(videoFrame);
-	//Vid_.release();
-	//
-	//QVideoWidget *VidWidget = new QVideoWidget;
-	//QPixmap pictureFrame = videoFrame;
-	
-	//VidWidget->show();
 
-	auto *label = new QLabel("so what?");
-	label->setParent(this);
-	label->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-	label->show();
-	auto FirstButton = new QPushButton("OK");
-	FirstButton->setParent(this);
-	FirstButton->setFixedHeight(20);
-	FirstButton->setFixedWidth(100);
-	FirstButton->show();
+	// Create central widget
+	m_centralWidget = new QWidget(this);
+	this->setCentralWidget(m_centralWidget);
 
-	//cv::imshow("label", videoFrame);
-	//label->setPixmap(videoFrame);
-	this->setFixedHeight(600);
-	this->setFixedWidth(900);
+	// Create layout
+	m_verticalLayout = new QVBoxLayout(m_centralWidget);
+
+	// Define size policy
+	//QSizePolicy sizePolicyMainWindow(QSizePolicy::Fixed, QSizePolicy::Fixed);
+	//this->setSizePolicy(sizePolicyMainWindow);
+
+	// Create main bar
+	QPushButton *button1 = new QPushButton("One");
+	QPushButton *button2 = new QPushButton("Two");
+	QPushButton *button3 = new QPushButton("Three");
+	QPushButton *button4 = new QPushButton("Four");
+	QPushButton *button5 = new QPushButton("Five");
+
+	m_verticalLayout->addWidget(button1);
+	m_verticalLayout->addWidget(button2);
+	m_verticalLayout->addWidget(button3);
+	m_verticalLayout->addWidget(button4);
+	m_verticalLayout->addWidget(button5);
+
+	m_verticalLayout->setDirection(QBoxLayout::LeftToRight);
+
+	m_centralWidget->setLayout(m_verticalLayout);
+
+
+
+	//m_mainBar = new QtMainBar(this);
+	//m_verticalLayout->addWidget(m_mainBar);
+	//connect(m_mainBar, SIGNAL(moduleSelectedSIG(QToolButton*, int&)), this, SLOT(moduleSelectedSlot(QToolButton*, int&)));
+	//connect(m_mainBar, SIGNAL(exitClickedSIG()), this, SLOT(exitSlot()));
+
+	// Create module widget place
+	m_moduleWidget = new QWidget(m_centralWidget);
+	QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+	sizePolicy.setHorizontalStretch(1);
+	sizePolicy.setVerticalStretch(1);
+	sizePolicy.setHeightForWidth(m_moduleWidget->sizePolicy().hasHeightForWidth());
+	m_moduleWidget->setSizePolicy(sizePolicy);
+	m_verticalLayout->addWidget(m_moduleWidget);
+	m_moduleVerticalLayout = new QVBoxLayout(m_moduleWidget);
+	m_moduleVerticalLayout->setMargin(0);
+	m_moduleVerticalLayout->setSpacing(0);
+
+
+	// Connect signals and slots for status bar
+	//connect(m_statusBar, SIGNAL(startProgressEventSig()), m_statusBar, SLOT(progressBarActive()));
+	//connect(m_statusBar, SIGNAL(endProgressEventSig()), m_statusBar, SLOT(progressBarInactive()));
+	this->setWindowState(Qt::WindowMaximized | Qt::WindowActive);
+
 }
 
 void MainWindow::startThreads()
