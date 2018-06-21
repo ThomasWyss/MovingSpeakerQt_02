@@ -158,7 +158,7 @@ void CameraThread::run(void)
 
 	while (Vid_.read(Frame_)) {		
 		
-		Frame_= imread(CalFile, CV_LOAD_IMAGE_COLOR);
+		//Frame_= imread(CalFile, CV_LOAD_IMAGE_COLOR);
 		
 		chronoOld = chronoNow;
 		chronoNow = std::chrono::high_resolution_clock::now();
